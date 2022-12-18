@@ -2,7 +2,7 @@ from pathlib import Path
 
 import nlib3
 
-from .define import Building, Item
+from .define import Building, Item, Purity
 
 
 class RecipeIO():
@@ -34,11 +34,33 @@ class RecipeIO():
 
 
 class Recipe():
-    def __init__(self, in_items: RecipeIO, out_items: RecipeIO, building: Building) -> None:
+    def __init__(self, in_items: RecipeIO, out_items: RecipeIO, building: Building, clock_speed: float = 1, purity: Purity = Purity.normal) -> None:
         self.in_items = in_items
         self.out_items = out_items
         self.building = building
+        self.clock_speed = clock_speed
+        self.purity = purity
+        if self.purity != Purity.normal and len(self.in_items) != 0:
+            nlib3.print_error_log("入力アイテムの設定されているレシピに資源ノードの純度を設定することはできません")
         return
+
+    def with_clock_speed(self, clock_speed: float):
+        return self.__class__(self.in_items, self.out_items, self.building, clock_speed, self.purity)
+
+    def with_purity(self, purity: Purity):
+        return self.__class__(self.in_items, self.out_items, self.building, self.clock_speed, purity)
+
+    def get_in_items(self) -> tuple:
+        return tuple([(item_name, speed_pm * self.clock_speed) for item_name, speed_pm in self.in_items.get_items()])
+
+    def get_in_item_names(self) -> tuple:
+        return self.in_items.get_item_names()
+
+    def get_out_items(self) -> tuple:
+        return tuple([(item_name, speed_pm * self.purity.value * self.clock_speed) for item_name, speed_pm in self.out_items.get_items()])
+
+    def get_out_item_names(self) -> tuple:
+        return self.out_items.get_item_names()
 
     def to_dict(self) -> dict:
         result = {
@@ -105,13 +127,13 @@ class RecipeNode():
         """
         result_out_speed_pm = None
         machines = None
-        for out_item, out_speed_pm in self.recipe.out_items.get_items():
+        for out_item, out_speed_pm in self.recipe.get_out_items():
             if out_item == item:                                                                                    # 要求されたアイテムと同じなら
-                if not self.recipe.in_items:                                                                        # 入力アイテムがなければ
+                if not self.recipe.get_in_items():                                                                  # 入力アイテムがなければ
                     result_out_speed_pm = out_speed_pm
                     machines = 1
                 else:
-                    for in_item, in_speed_pm in self.recipe.in_items.get_items():                                   # 全ての入力アイテム
+                    for in_item, in_speed_pm in self.recipe.get_in_items():                                         # 全ての入力アイテム
                         if in_item in self.input_recipe_node:                                                       # 必要な入力アイテムの前ノードが存在すれば
                             result = self.input_recipe_node[in_item].get_info(in_item)[0]                           # このレシピに渡される in_item の数
                             if result:
@@ -124,7 +146,7 @@ class RecipeNode():
 
     def get_recipe_tree_str(self) -> str:
         result = "("
-        for item_name, speed_pm in self.recipe.out_items.get_items():
+        for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_info(item_name)
             result += f"{{item: {item_name}, out: {info_result[0]}, machines: {info_result[1]}}}, "
         result = result[:-2]
@@ -137,7 +159,7 @@ class RecipeNode():
 
     def __str__(self) -> str:
         result = "("
-        for row in self.recipe.out_items.get_item_names():
+        for row in self.recipe.get_out_item_names():
             result += f"{row}, "
         result = result[:-2]
         result += ")"

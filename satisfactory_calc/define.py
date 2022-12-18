@@ -1,3 +1,5 @@
+import enum
+
 import nlib3
 
 
@@ -46,3 +48,12 @@ class Building(nlib3.StrEnum):
     oil_extractor = "Oil Extractor"         # 原油抽出機
     refinery = "Refinery"                   # 精製施設
     othre = "othre"
+
+
+
+
+class Purity(float, enum.Enum):
+    """純度"""
+    impure = 0.5
+    normal = 1
+    pure = 2
