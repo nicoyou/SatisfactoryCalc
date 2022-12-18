@@ -1,5 +1,5 @@
 # Satisfactory Calc
-### satisfactory の生産ラインを簡単に計算することができます。
+### The satisfactory production line can be easily calculated.
 
 
 
@@ -8,7 +8,7 @@
 ![Python versions](https://img.shields.io/pypi/pyversions/satisfactory-calc)
 
 
-## インストール方法
+## Installation
 ```bash
 pip install satisfactory-calc
 ```
