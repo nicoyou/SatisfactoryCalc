@@ -18,6 +18,19 @@ def alternate(product: Item, num: int = 1) -> str:
 
 
 RECIPE: Final[dict[str | Item, Recipe]] = {
+                                                                                                # Limestone
+    Ingredients.limestone:
+    Recipe(
+        RecipeIO(),
+        RecipeIO(Ingredients.limestone, 240),
+        Building.miner_mk3,
+    ),
+    Ingredients.concrete:
+    Recipe(
+        RecipeIO(Ingredients.limestone, 45),
+        RecipeIO(Ingredients.concrete, 15),
+        Building.smelter,
+    ),
                                                                                                 # Iron
     Ingredients.iron_ore:
     Recipe(
@@ -48,6 +61,31 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.iron_rod, 10),
         RecipeIO(Ingredients.screw, 40),
         Building.constructor,
+    ),
+                                                                                                # Steel Ingot
+    Ingredients.steel_ingot:
+    Recipe(
+        RecipeIO(Ingredients.iron_ore, 45).add_item(Ingredients.coal, 45),
+        RecipeIO(Ingredients.steel_ingot, 45),
+        Building.foundry,
+    ),
+    Ingredients.steel_beam:
+    Recipe(
+        RecipeIO(Ingredients.steel_ingot, 60),
+        RecipeIO(Ingredients.steel_beam, 15),
+        Building.constructor,
+    ),
+    Ingredients.steel_pipe:
+    Recipe(
+        RecipeIO(Ingredients.steel_ingot, 30),
+        RecipeIO(Ingredients.steel_pipe, 20),
+        Building.constructor,
+    ),
+    Ingredients.encased_industrial_beam:
+    Recipe(
+        RecipeIO(Ingredients.steel_beam, 24).add_item(Ingredients.concrete, 30),
+        RecipeIO(Ingredients.encased_industrial_beam, 6),
+        Building.assembler,
     ),
                                                                                                 # Copper
     Ingredients.copper_ore:
@@ -174,5 +212,4 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Liquid.sulfuric_acid, 50),
         Building.refinery,
     ),
-                                                                                                # Nuclear power
 }

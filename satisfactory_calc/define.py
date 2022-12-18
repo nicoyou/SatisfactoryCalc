@@ -12,6 +12,9 @@ class Item(nlib3.StrEnum):
 
 class Ingredients(Item):
     """材料"""
+    # Limestone
+    limestone = "Limestone"
+    concrete = "Concrete"
     # Coal
     coal = "Coal"
     # Iron
@@ -20,6 +23,11 @@ class Ingredients(Item):
     iron_plate = "Iron Plate"
     iron_rod = "Iron Rod"
     screw = "screw"
+    # Steel Ingot
+    steel_ingot = "Steel Ingot"
+    steel_beam = "Steel Beam"
+    steel_pipe = "Steel Pipe"
+    encased_industrial_beam = "Encased Industrial Beam"
     # Copper
     copper_ore = "Copper Ore"
     copper_ingot = "Copper Ingot"
@@ -61,12 +69,14 @@ class Building(nlib3.StrEnum):
     miner_mk2 = "Miner Mk.2"
     miner_mk3 = "Miner Mk.3"
     smelter = "Smelter"                     # 製錬炉
+    foundry = "Foundry"                     # 鋳造所
     constructor = "Constructor"             # 製作機
     assembler = "Assembler"                 # 組立機
-    Manufacturer = "Manufacturer"           # 製造機
+    manufacturer = "Manufacturer"           # 製造機
     water_extractor = "Water Extractor"     # 揚水ポンプ
     oil_extractor = "Oil Extractor"         # 原油抽出機
     refinery = "Refinery"                   # 精製施設
+    blender = "Blender"                     # 混合機
     othre = "othre"
 
 
