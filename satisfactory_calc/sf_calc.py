@@ -132,7 +132,7 @@ class RecipeNode():
                     return ((sum(input_node_speed_pm_list)) / in_speed_pm)
         return None
 
-    def get_info(self, item: Item) -> tuple[float | None, float | None]:
+    def get_machines_num(self, item: Item) -> float | None:
         """毎分生成されるアイテムの数を取得する
 
         Args:
@@ -141,28 +141,23 @@ class RecipeNode():
         Returns:
             アイテム数
         """
-        result_out_speed_pm = None
-        machines = None
+        result_machines_num = None
         for out_item, out_speed_pm in self.recipe.get_out_items():
-            if out_item == item:                                                # 要求されたアイテムと同じなら
-                if not self.recipe.get_in_items():                              # 入力アイテムがなければ
-                    result_out_speed_pm = out_speed_pm
-                    machines = 1
+            if out_item == item:                                                                                                      # 要求されたアイテムと同じなら
+                if not self.recipe.get_in_items():                                                                                    # 入力アイテムがなければ
+                    result_machines_num = 1
                 else:
-                    for in_item, in_speed_pm in self.recipe.get_in_items():     # 全ての入力アイテム
-                        input_node_speed_pm_list = []                           # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
-                        for input_recipe_node in self.input_recipe_node_list:   # 全ての前ノード
-                            result = input_recipe_node.get_info(in_item)[0]     # このレシピに渡される in_item の数
-
+                    for in_item, in_speed_pm in self.recipe.get_in_items():                                                           # 全ての入力アイテム
+                        input_node_machines_num_list = []                                                                             # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
+                        for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
+                            result = input_recipe_node.get_machines_num(in_item)                                                      # このレシピに渡される前のレシピの台数
                             if result:
-                                input_node_speed_pm_list.append(result)                                         # このレシピに渡される in_item の数
-                        if input_node_speed_pm_list:                                                            # 一つでも入力される素材があれば
-                            machines_temp = sum(input_node_speed_pm_list) / in_speed_pm
-                            result_out_speed_pm_temp = machines_temp * out_speed_pm
-                            if result_out_speed_pm is None or result_out_speed_pm < result_out_speed_pm_temp:   # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
-                                machines = machines_temp
-                                result_out_speed_pm = result_out_speed_pm_temp
-        return (result_out_speed_pm, machines)
+                                input_node_machines_num_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
+                        if input_node_machines_num_list:                                                                              # 一つでも入力される素材があれば
+                            machines_temp = sum(input_node_machines_num_list) / in_speed_pm
+                            if result_machines_num is None or result_machines_num < machines_temp:                                    # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
+                                result_machines_num = machines_temp
+        return result_machines_num
 
     def detailed_recipe_tree_dumps(self) -> str:
         """詳細な情報を付加したレシピツリーを出力する
@@ -172,8 +167,8 @@ class RecipeNode():
         """
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
-            info_result = self.get_info(item_name)
-            result += f"{{item: {item_name}, out: {info_result[0]}, machines: {info_result[1]}}}, "
+            info_result = self.get_machines_num(item_name)
+            result += f"{{item: {item_name}, out: {info_result*speed_pm}, machines: {info_result}}}, "
         result = result[:-2]
         result += ")"
         if self.input_recipe_node_list:
