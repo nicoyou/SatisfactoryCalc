@@ -2,11 +2,12 @@ from pathlib import Path
 
 import nlib3
 
-from . import define
-from .define import Building, Item, Ingredients, Liquid, Gas, Purity
+from . import define, recipe
+from .define import Building, Gas, Ingredients, Item, Liquid, Purity
 
 
 class RecipeIO():
+    """レシピの入出力を定義する"""
     def __init__(self, item: Item | None = None, speed_pm: float | None = None) -> None:
         self.items = []
         if item is not None and speed_pm is not None:
@@ -25,6 +26,14 @@ class RecipeIO():
 
     @staticmethod
     def from_items(item_list):
+        """get_items メソッドで取得した値から RecipeIO クラスを生成する
+
+        Args:
+            item_list: get_items メソッドで取得した値
+
+        Returns:
+            RecipeIO クラス
+        """
         cls = RecipeIO()
         for row in item_list:
             cls.add_item(row[0], row[1])
@@ -35,6 +44,7 @@ class RecipeIO():
 
 
 class Recipe():
+    """レシピを格納する"""
     def __init__(self, in_items: RecipeIO, out_items: RecipeIO, building: Building, clock_speed: float = 1, purity: Purity = Purity.normal) -> None:
         self.in_items = in_items
         self.out_items = out_items
@@ -46,18 +56,49 @@ class Recipe():
         return
 
     def with_clock_speed(self, clock_speed: float):
+        """オーバークロックのスピードを設定する
+
+        Args:
+            clock_speed: オーバークロックの倍率 ( 0 ~ 2.5 )
+
+        Returns:
+            指定されたオーバークロックの値に変更した Recipe クラス
+        """
         return self.__class__(self.in_items, self.out_items, self.building, clock_speed, self.purity)
 
     def with_purity(self, purity: Purity):
+        """資源ノードの純度を指定する ( レシピに入力材料がない場合のみ使用可能 )
+
+        Args:
+            purity: 純度の enum
+
+        Returns:
+            指定された純度の値に変更した Recipe クラス
+        """
         return self.__class__(self.in_items, self.out_items, self.building, self.clock_speed, purity)
 
     def get_in_items(self) -> tuple:
+        """入力アイテム情報のリストを取得する
+
+        Returns:
+            入力アイテム情報のリスト
+        """
         return tuple([(item_name, speed_pm * self.clock_speed) for item_name, speed_pm in self.in_items.get_items()])
 
-    def get_in_item_names(self) -> tuple:
+    def get_in_item_names(self) -> tuple[Item]:
+        """入力アイテム名のリストを取得する
+
+        Returns:
+            入力アイテム名のリスト
+        """
         return self.in_items.get_item_names()
 
     def get_out_items(self) -> tuple:
+        """出力アイテム情報のリストを取得する
+
+        Returns:
+            出力アイテム情報リスト
+        """
         result = []
         for item_name, speed_pm in self.out_items.get_items():
             out_num = speed_pm * self.purity.value * self.clock_speed
@@ -68,7 +109,12 @@ class Recipe():
             result.append((item_name, out_num))
         return tuple(result)
 
-    def get_out_item_names(self) -> tuple:
+    def get_out_item_names(self) -> tuple[Item]:
+        """出力アイテム名のリストを取得する
+
+        Returns:
+            出力アイテム名のリスト
+        """
         return self.out_items.get_item_names()
 
     def get_out_item_speed_pm(self, item: Item):
@@ -101,15 +147,24 @@ def load_recipe_list(file_path: str | Path):
 
 
 class RecipeNode():
+    """一つのレシピを木構造のノードとして保持するクラス ( 子ノードの情報のみ保持する )"""
     def __init__(self, recipe: Recipe, parent=None, main_item=False) -> None:
         self.recipe = recipe
         self.input_recipe_node_list = []
         self.main_item = main_item
         if parent is not None:
-            parent.add_input_recipe(self)
+            parent.add_input_recipe_node(self)
         return
 
-    def add_input_recipe(self, recipe_node) -> bool:
+    def add_input_recipe_node(self, recipe_node) -> bool:
+        """子ノードを追加する
+
+        Args:
+            recipe_node: 子ノード
+
+        Returns:
+            正常に追加できたら True
+        """
         for out_item in recipe_node.recipe.out_items.get_item_names():
             if out_item in self.recipe.in_items.get_item_names():
                 self.input_recipe_node_list.append(recipe_node)
@@ -117,7 +172,27 @@ class RecipeNode():
         nlib3.print_error_log("指定されたレシピが正しくありません")
         return False
 
-    def get_out_machines_num_from_main(self) -> float | None:
+    def get_input_nodes(self, item: Item) -> list:
+        """出力するアイテムを指定して保持している子ノードを取得する
+
+        Args:
+            item: 子ノードが出力するアイテム
+
+        Returns:
+            子ノードを格納したリスト
+        """
+        result_list = []
+        for row in self.input_recipe_node_list:
+            if item in row.recipe.get_out_item_names():
+                result_list.append(row)
+        return result_list
+
+    def get_out_machines_num_based_main_item(self) -> float | None:
+        """メインレシピノードのアイテム数を基準に設置すべき施設の台数を取得する
+
+        Returns:
+            必要な施設の数
+        """
         if self.main_item:  # 入力アイテムがなければ
             return 1
 
@@ -125,19 +200,28 @@ class RecipeNode():
             input_node_speed_pm_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
             for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
                 if in_item in input_recipe_node.recipe.get_out_item_names():                                              # 今回求めている入力素材が、前のレシピノードの出力素材なら
-                    result = input_recipe_node.get_out_machines_num_from_main()                                           # 前ノードのレシピの出力から今回必要な素材を取得する
+                    result = input_recipe_node.get_out_machines_num_based_main_item()                                     # 前ノードのレシピの出力から今回必要な素材を取得する
                     if result:                                                                                            # 前ノード以前にメインノードが存在すれば
                         input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
             if input_node_speed_pm_list:                                                                                  # 一つでも入力される素材があれば
                 return ((sum(input_node_speed_pm_list)) / in_speed_pm)
         return None
 
-    def get_out_machines_num(self) -> float | None:
-        """設置すべき機会の台数を取得する ( 一番高頻度で搬入された素材に合わせて計算する )
+    def get_out_machines_num(self, out_speed_item: Item | None = None, out_speed_pm: float | None = None) -> float | None:
+        """設置すべき施設の台数を取得する ( 一番高頻度で搬入された素材に合わせて計算する )
+
+        Args:
+            out_speed_item: 出力速度を指定する場合は必要とするアイテム
+            out_speed_pm: 出力速度を指定する場合は、out_speed_item で指定したアイテムの毎分必要数
 
         Returns:
-            全ての素材の中で最大の機械数
+            全ての素材で最大になる施設数
         """
+        if out_speed_item and out_speed_pm:
+            for item_name, speed_pm in self.recipe.get_out_items():
+                if item_name == out_speed_item:
+                    return out_speed_pm / speed_pm
+
         if not self.recipe.get_in_items():  # 入力アイテムがなければ
             return 1
 
@@ -178,6 +262,60 @@ class RecipeNode():
                 else:
                     result += row.detailed_recipe_tree_dumps()
         return result
+
+    def detailed_recipe_tree_dumps_based_main_item(self, out_machines_num: float | None = None) -> str:
+        """詳細な情報を付加したレシピツリーを出力する
+        必要資源を計算するときに main_item が指定されているノードを元に他の全資源を計算する
+
+        Returns:
+            レシピツリーの文字列
+        """
+        if out_machines_num is None:
+            out_machines_num = self.get_out_machines_num_based_main_item()
+            if out_machines_num is None:
+                nlib3.print_error_log("メインアイテムが指定されていません")
+                return ""
+        result = "("
+        for item_name, speed_pm in self.recipe.get_out_items():
+            result += f"{{item: {item_name}, out: {out_machines_num * speed_pm}, machines: {out_machines_num}}}, "
+        result = result[:-2]
+        result += ")"
+        if self.input_recipe_node_list:
+            result += "  ←  "
+            for i, row in enumerate(self.input_recipe_node_list):
+                for in_item_name, in_item_speed_pm in self.recipe.get_in_items():                                       # このレシピノードの入力素材が
+                    if in_item_name in row.recipe.get_out_item_names():                                                 # 入力レシピノードの出力素材に存在すれば
+                        if not row.main_item:
+                            need_speed_pm = row.get_out_machines_num(in_item_name, in_item_speed_pm * out_machines_num) # 再帰するときに入力レシピノードに要求する素材の数を計算する
+                        else:
+                            need_speed_pm = row.get_out_machines_num()                                                  # メインアイテムの場合は普通に計算に計算しないと、複数の採掘機が設定されていた場合は、その合計に再計算されてしまう
+                        recipe_tree_dumps_result = row.detailed_recipe_tree_dumps_based_main_item(need_speed_pm)        # 入力レシピノードに要求素材数を渡してツリー図を要求する
+                        if len(row.input_recipe_node_list) >= 1:                                                        # 入力素材の入力素材が一つ以上あれば
+                            if i == len(self.input_recipe_node_list) - 1:
+                                result += "[" + recipe_tree_dumps_result + "]"
+                            else:
+                                result += "[" + recipe_tree_dumps_result + "], "
+                        else:
+                            result += recipe_tree_dumps_result
+        return result
+
+    def automatic_node_generation(self):
+        """基本レシピを使用して子ノードを自動で生成する"""
+        for in_item_name in self.recipe.get_in_item_names():    # 入力レシピノードの出力素材に存在すれば
+            if not recipe.RECIPE.get(in_item_name):
+                nlib3.print_error_log(f"入力素材のレシピが存在しません [item={in_item_name}]")
+                continue
+            exist = False
+            for row in self.input_recipe_node_list:
+                if in_item_name in row.recipe.get_out_item_names():
+                    exist = True
+            if exist:
+                print(f"既に存在するノードの生成をスキップしました [item={in_item_name}]")
+                continue
+
+            child_node = RecipeNode(recipe.RECIPE[in_item_name], parent=self)
+            child_node.automatic_node_generation()
+        return
 
     def __str__(self) -> str:
         result = "("
