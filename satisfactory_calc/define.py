@@ -2,6 +2,9 @@ import enum
 
 import nlib3
 
+CONVEYOR_BELT_MAX = 780
+PIPE_MAX = 600
+
 
 class Item(nlib3.StrEnum):
     """アイテム"""
@@ -49,6 +52,7 @@ class Gas(Item):
 
 
 class Building(nlib3.StrEnum):
+    """建物"""
     miner_mk1 = "Miner Mk.1"
     miner_mk2 = "Miner Mk.2"
     miner_mk3 = "Miner Mk.3"
