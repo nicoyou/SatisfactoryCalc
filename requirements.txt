@@ -1,1 +1,5 @@
 nlib3
+
+# pypi
+wheel
+twine

@@ -3,3 +3,9 @@ __pycache__
 /.vscode/
 
 /data/
+
+
+# パッケージ化
+/build/
+/dist/
+/satisfactory_calc.egg-info/
