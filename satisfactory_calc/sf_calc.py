@@ -117,7 +117,7 @@ class RecipeNode():
         nlib3.print_error_log("指定されたレシピが正しくありません")
         return False
 
-    def get_out_machines_num_from_main(self) -> float | None:
+    def get_out_machines_num_based_main_item(self) -> float | None:
         if self.main_item:  # 入力アイテムがなければ
             return 1
 
@@ -125,19 +125,28 @@ class RecipeNode():
             input_node_speed_pm_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
             for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
                 if in_item in input_recipe_node.recipe.get_out_item_names():                                              # 今回求めている入力素材が、前のレシピノードの出力素材なら
-                    result = input_recipe_node.get_out_machines_num_from_main()                                           # 前ノードのレシピの出力から今回必要な素材を取得する
+                    result = input_recipe_node.get_out_machines_num_based_main_item()                                     # 前ノードのレシピの出力から今回必要な素材を取得する
                     if result:                                                                                            # 前ノード以前にメインノードが存在すれば
                         input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
             if input_node_speed_pm_list:                                                                                  # 一つでも入力される素材があれば
                 return ((sum(input_node_speed_pm_list)) / in_speed_pm)
         return None
 
-    def get_out_machines_num(self) -> float | None:
+    def get_out_machines_num(self, out_speed_item: Item | None = None, out_speed_pm: float | None = None) -> float | None:
         """設置すべき機会の台数を取得する ( 一番高頻度で搬入された素材に合わせて計算する )
 
+        Args:
+            out_speed_item: 出力速度を指定する場合は必要とするアイテム
+            out_speed_pm: 出力速度を指定する場合は、out_speed_item で指定したアイテムの毎分必要数
+
         Returns:
-            全ての素材の中で最大の機械数
+            全ての素材で最大になる機械数
         """
+        if out_speed_item and out_speed_pm:
+            for item_name, speed_pm in self.recipe.get_out_items():
+                if item_name == out_speed_item:
+                    return out_speed_pm / speed_pm
+
         if not self.recipe.get_in_items():  # 入力アイテムがなければ
             return 1
 
@@ -177,6 +186,42 @@ class RecipeNode():
                         result += "[" + row.detailed_recipe_tree_dumps() + "], "
                 else:
                     result += row.detailed_recipe_tree_dumps()
+        return result
+
+    def detailed_recipe_tree_dumps_based_main_item(self, out_machines_num: float | None = None) -> str:
+        """詳細な情報を付加したレシピツリーを出力する
+        必要資源を計算するときに main_item が指定されているノードを元に他の全資源を計算する
+
+        Returns:
+            レシピツリーの文字列
+        """
+        if out_machines_num is None:
+            out_machines_num = self.get_out_machines_num_based_main_item()
+            if out_machines_num is None:
+                nlib3.print_error_log("メインアイテムが指定されていません")
+                return ""
+        result = "("
+        for item_name, speed_pm in self.recipe.get_out_items():
+            result += f"{{item: {item_name}, out: {out_machines_num * speed_pm}, machines: {out_machines_num}}}, "
+        result = result[:-2]
+        result += ")"
+        if self.input_recipe_node_list:
+            result += "  ←  "
+            for i, row in enumerate(self.input_recipe_node_list):
+                for in_item_name, in_item_speed_pm in self.recipe.get_in_items():                                       # このレシピノードの入力素材が
+                    if in_item_name in row.recipe.get_out_item_names():                                                 # 入力レシピノードの出力素材に存在すれば
+                        if not row.main_item:
+                            need_speed_pm = row.get_out_machines_num(in_item_name, in_item_speed_pm * out_machines_num) # 再帰するときに入力レシピノードに要求する素材の数を計算する
+                        else:
+                            need_speed_pm = row.get_out_machines_num()                                                  # メインアイテムの場合は普通に計算に計算しないと、複数の採掘機が設定されていた場合は、その合計に再計算されてしまう
+                        recipe_tree_dumps_result = row.detailed_recipe_tree_dumps_based_main_item(need_speed_pm)        # 入力レシピノードに要求素材数を渡してツリー図を要求する
+                        if len(row.input_recipe_node_list) >= 1:                                                        # 入力素材の入力素材が一つ以上あれば
+                            if i == len(self.input_recipe_node_list) - 1:
+                                result += "[" + recipe_tree_dumps_result + "]"
+                            else:
+                                result += "[" + recipe_tree_dumps_result + "], "
+                        else:
+                            result += recipe_tree_dumps_result
         return result
 
     def __str__(self) -> str:
