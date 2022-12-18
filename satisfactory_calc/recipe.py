@@ -18,7 +18,7 @@ def alternate(product: Item, num: int = 1) -> str:
 
 
 RECIPE: Final[dict[str | Item, Recipe]] = {
-                                                                                                # Limestone
+                                                                                                                                                                # Limestone
     Ingredients.limestone:
     Recipe(
         RecipeIO(),
@@ -31,7 +31,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.concrete, 15),
         Building.smelter,
     ),
-                                                                                                # Iron
+                                                                                                                                                                # Iron
     Ingredients.iron_ore:
     Recipe(
         RecipeIO(),
@@ -62,7 +62,19 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.screw, 40),
         Building.constructor,
     ),
-                                                                                                # Steel Ingot
+    Ingredients.reinforced_iron_plate:
+    Recipe(
+        RecipeIO(Ingredients.iron_plate, 30).add_item(Ingredients.screw, 60),
+        RecipeIO(Ingredients.reinforced_iron_plate, 5),
+        Building.assembler,
+    ),
+    Ingredients.rotor:
+    Recipe(
+        RecipeIO(Ingredients.iron_rod, 20).add_item(Ingredients.screw, 100),
+        RecipeIO(Ingredients.rotor, 4),
+        Building.assembler,
+    ),
+                                                                                                                                                                # Steel Ingot
     Ingredients.steel_ingot:
     Recipe(
         RecipeIO(Ingredients.iron_ore, 45).add_item(Ingredients.coal, 45),
@@ -87,7 +99,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.encased_industrial_beam, 6),
         Building.assembler,
     ),
-                                                                                                # Copper
+                                                                                                                                                                # Copper
     Ingredients.copper_ore:
     Recipe(
         RecipeIO(),
@@ -124,7 +136,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.cable, 30),
         Building.constructor,
     ),
-                                                                                                # Raw Quartz
+                                                                                                                                                                # Raw Quartz
     Ingredients.raw_quartz:
     Recipe(
         RecipeIO(),
@@ -143,7 +155,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.silica, 37.5),
         Building.constructor,
     ),
-                                                                                                # Caterium
+                                                                                                                                                                # Caterium
     Ingredients.caterium_ore:
     Recipe(
         RecipeIO(),
@@ -174,7 +186,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.quickwire, 90),
         Building.constructor,
     ),
-                                                                                                # Sulfur
+                                                                                                                                                                # Sulfur
     Ingredients.sulfur:
     Recipe(
         RecipeIO(),
@@ -193,7 +205,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.compacted_coal, 25),
         Building.assembler,
     ),
-                                                                                                # Liquid
+                                                                                                                                                                # Liquid
     Liquid.water:
     Recipe(
         RecipeIO(),
@@ -211,5 +223,56 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.sulfur, 50).add_item(Liquid.water, 50),
         RecipeIO(Liquid.sulfuric_acid, 50),
         Building.refinery,
+    ),
+                                                                                                                                                                # Intermediate material
+    Ingredients.stator:
+    Recipe(
+        RecipeIO(Ingredients.steel_pipe, 15).add_item(Ingredients.wire, 40),
+        RecipeIO(Ingredients.stator, 5),
+        Building.assembler,
+    ),
+    Ingredients.ai_limiter:
+    Recipe(
+        RecipeIO(Ingredients.copper_sheet, 25).add_item(Ingredients.quickwire, 100),
+        RecipeIO(Ingredients.ai_limiter, 5),
+        Building.assembler,
+    ),
+    Ingredients.electromagnetic_control_rod:
+    Recipe(
+        RecipeIO(Ingredients.stator, 6).add_item(Ingredients.ai_limiter, 4),
+        RecipeIO(Ingredients.electromagnetic_control_rod, 4),
+        Building.assembler,
+    ),
+
+                                                                                                                                                                # Nuclear power
+    Ingredients.uranium:
+    Recipe(
+        RecipeIO(),
+        RecipeIO(Ingredients.uranium, 240),
+        Building.miner_mk3,
+    ),
+    Ingredients.encased_uranium_cell:
+    Recipe(
+        RecipeIO(Ingredients.uranium, 50).add_item(Ingredients.concrete, 15).add_item(Liquid.sulfuric_acid, 40),
+        RecipeIO(Ingredients.encased_uranium_cell, 25).add_item(Liquid.sulfuric_acid, 10),
+        Building.blender,
+    ),
+    alternate(Ingredients.encased_uranium_cell):
+    Recipe(
+        RecipeIO(Ingredients.uranium, 25).add_item(Ingredients.silica, 15).add_item(Ingredients.sulfur, 25).add_item(Ingredients.quickwire, 75),
+        RecipeIO(Ingredients.encased_uranium_cell, 20),
+        Building.manufacturer,
+    ),
+    Ingredients.uranium_fuel_rod:
+    Recipe(
+        RecipeIO(Ingredients.encased_uranium_cell, 20).add_item(Ingredients.encased_industrial_beam, 1.2).add_item(Ingredients.electromagnetic_control_rod, 2),
+        RecipeIO(Ingredients.uranium_fuel_rod, 0.4),
+        Building.manufacturer,
+    ),
+    Ingredients.uranium_waste:
+    Recipe(
+        RecipeIO(Ingredients.uranium_fuel_rod, 0.2).add_item(Liquid.water, 240),
+        RecipeIO(Ingredients.uranium_waste, 10),
+        Building.nuclear_power_plant,
     ),
 }

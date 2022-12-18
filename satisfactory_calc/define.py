@@ -23,6 +23,8 @@ class Ingredients(Item):
     iron_plate = "Iron Plate"
     iron_rod = "Iron Rod"
     screw = "screw"
+    reinforced_iron_plate = "Reinforced Iron Plate"
+    rotor = "Rotor"
     # Steel Ingot
     steel_ingot = "Steel Ingot"
     steel_beam = "Steel Beam"
@@ -47,9 +49,16 @@ class Ingredients(Item):
     sulfur = "Sulfur"
     black_powder = "Black Powder"
     compacted_coal = "Compacted Coal"
+    # Intermediate material
+    stator = "Stator"                                               # 固定子
+    ai_limiter = "AI Limiter"                                       # AI リミッター
+    electromagnetic_control_rod = "Electromagnetic Control Rod"     # 電磁制御棒
+
     # Nuclear power
     uranium = "Uranium"
     encased_uranium_cell = "Encased Uranium Cell"
+    uranium_fuel_rod = "Uranium Fuel Rod"
+    uranium_waste = "Uranium Waste"
 
 
 class Liquid(Item):
@@ -68,15 +77,16 @@ class Building(nlib3.StrEnum):
     miner_mk1 = "Miner Mk.1"
     miner_mk2 = "Miner Mk.2"
     miner_mk3 = "Miner Mk.3"
-    smelter = "Smelter"                     # 製錬炉
-    foundry = "Foundry"                     # 鋳造所
-    constructor = "Constructor"             # 製作機
-    assembler = "Assembler"                 # 組立機
-    manufacturer = "Manufacturer"           # 製造機
-    water_extractor = "Water Extractor"     # 揚水ポンプ
-    oil_extractor = "Oil Extractor"         # 原油抽出機
-    refinery = "Refinery"                   # 精製施設
-    blender = "Blender"                     # 混合機
+    smelter = "Smelter"                             # 製錬炉
+    foundry = "Foundry"                             # 鋳造所
+    constructor = "Constructor"                     # 製作機
+    assembler = "Assembler"                         # 組立機
+    manufacturer = "Manufacturer"                   # 製造機
+    water_extractor = "Water Extractor"             # 揚水ポンプ
+    oil_extractor = "Oil Extractor"                 # 原油抽出機
+    refinery = "Refinery"                           # 精製施設
+    blender = "Blender"                             # 混合機
+    nuclear_power_plant = "Nuclear Power Plant"     # 原子力発電所
     othre = "othre"
 
 
