@@ -7,6 +7,7 @@ from .define import Building, Item, Ingredients, Liquid, Gas, Purity
 
 
 class RecipeIO():
+    """レシピの入出力を定義する"""
     def __init__(self, item: Item | None = None, speed_pm: float | None = None) -> None:
         self.items = []
         if item is not None and speed_pm is not None:
@@ -25,6 +26,14 @@ class RecipeIO():
 
     @staticmethod
     def from_items(item_list):
+        """get_items メソッドで取得した値から RecipeIO クラスを生成する
+
+        Args:
+            item_list: get_items メソッドで取得した値
+
+        Returns:
+            RecipeIO クラス
+        """
         cls = RecipeIO()
         for row in item_list:
             cls.add_item(row[0], row[1])
@@ -35,6 +44,7 @@ class RecipeIO():
 
 
 class Recipe():
+    """レシピを格納する"""
     def __init__(self, in_items: RecipeIO, out_items: RecipeIO, building: Building, clock_speed: float = 1, purity: Purity = Purity.normal) -> None:
         self.in_items = in_items
         self.out_items = out_items
@@ -46,18 +56,49 @@ class Recipe():
         return
 
     def with_clock_speed(self, clock_speed: float):
+        """オーバークロックのスピードを設定する
+
+        Args:
+            clock_speed: オーバークロックの倍率 ( 0 ~ 2.5 )
+
+        Returns:
+            指定されたオーバークロックの値に変更した Recipe クラス
+        """
         return self.__class__(self.in_items, self.out_items, self.building, clock_speed, self.purity)
 
     def with_purity(self, purity: Purity):
+        """資源ノードの純度を指定する ( レシピに入力材料がない場合のみ使用可能 )
+
+        Args:
+            purity: 純度の enum
+
+        Returns:
+            指定された純度の値に変更した Recipe クラス
+        """
         return self.__class__(self.in_items, self.out_items, self.building, self.clock_speed, purity)
 
     def get_in_items(self) -> tuple:
+        """入力アイテム情報のリストを取得する
+
+        Returns:
+            入力アイテム情報のリスト
+        """
         return tuple([(item_name, speed_pm * self.clock_speed) for item_name, speed_pm in self.in_items.get_items()])
 
-    def get_in_item_names(self) -> tuple:
+    def get_in_item_names(self) -> tuple[Item]:
+        """入力アイテム名のリストを取得する
+
+        Returns:
+            入力アイテム名のリスト
+        """
         return self.in_items.get_item_names()
 
     def get_out_items(self) -> tuple:
+        """出力アイテム情報のリストを取得する
+
+        Returns:
+            出力アイテム情報リスト
+        """
         result = []
         for item_name, speed_pm in self.out_items.get_items():
             out_num = speed_pm * self.purity.value * self.clock_speed
@@ -68,7 +109,12 @@ class Recipe():
             result.append((item_name, out_num))
         return tuple(result)
 
-    def get_out_item_names(self) -> tuple:
+    def get_out_item_names(self) -> tuple[Item]:
+        """出力アイテム名のリストを取得する
+
+        Returns:
+            出力アイテム名のリスト
+        """
         return self.out_items.get_item_names()
 
     def get_out_item_speed_pm(self, item: Item):
@@ -101,15 +147,24 @@ def load_recipe_list(file_path: str | Path):
 
 
 class RecipeNode():
+    """一つのレシピを木構造のノードとして保持するクラス ( 子ノードの情報のみ保持する )"""
     def __init__(self, recipe: Recipe, parent=None, main_item=False) -> None:
         self.recipe = recipe
         self.input_recipe_node_list = []
         self.main_item = main_item
         if parent is not None:
-            parent.add_input_recipe(self)
+            parent.add_input_recipe_node(self)
         return
 
-    def add_input_recipe(self, recipe_node) -> bool:
+    def add_input_recipe_node(self, recipe_node) -> bool:
+        """子ノードを追加する
+
+        Args:
+            recipe_node: 子ノード
+
+        Returns:
+            正常に追加できたら True
+        """
         for out_item in recipe_node.recipe.out_items.get_item_names():
             if out_item in self.recipe.in_items.get_item_names():
                 self.input_recipe_node_list.append(recipe_node)
@@ -118,6 +173,11 @@ class RecipeNode():
         return False
 
     def get_out_machines_num_based_main_item(self) -> float | None:
+        """メインレシピノードのアイテム数を基準に設置すべき施設の台数を取得する
+
+        Returns:
+            必要な施設の数
+        """
         if self.main_item:  # 入力アイテムがなければ
             return 1
 
@@ -133,14 +193,14 @@ class RecipeNode():
         return None
 
     def get_out_machines_num(self, out_speed_item: Item | None = None, out_speed_pm: float | None = None) -> float | None:
-        """設置すべき機会の台数を取得する ( 一番高頻度で搬入された素材に合わせて計算する )
+        """設置すべき施設の台数を取得する ( 一番高頻度で搬入された素材に合わせて計算する )
 
         Args:
             out_speed_item: 出力速度を指定する場合は必要とするアイテム
             out_speed_pm: 出力速度を指定する場合は、out_speed_item で指定したアイテムの毎分必要数
 
         Returns:
-            全ての素材で最大になる機械数
+            全ての素材で最大になる施設数
         """
         if out_speed_item and out_speed_pm:
             for item_name, speed_pm in self.recipe.get_out_items():
