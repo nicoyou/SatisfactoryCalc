@@ -2,7 +2,7 @@ from pathlib import Path
 
 import nlib3
 
-from define import Building, Item
+from .define import Building, Item
 
 
 class RecipeIO():

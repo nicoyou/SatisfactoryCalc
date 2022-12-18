@@ -1,7 +1,7 @@
 from typing import Final
 
-from define import Building, Item
-from sf_calc import Recipe, RecipeIO
+from .define import Building, Item
+from .sf_calc import Recipe, RecipeIO
 
 
 def alternate(product: Item, num: int = 1) -> str:
