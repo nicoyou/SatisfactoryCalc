@@ -164,7 +164,7 @@ class RecipeNode():
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_out_machines_num()
-            result += f"{{item: {item_name}, out: {info_result*speed_pm}, machines: {info_result}}}, "
+            result += f"{{item: {item_name}, out: {info_result * speed_pm}, machines: {info_result}}}, "
         result = result[:-2]
         result += ")"
         if self.input_recipe_node_list:
