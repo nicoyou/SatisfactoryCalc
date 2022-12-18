@@ -71,6 +71,11 @@ class Recipe():
     def get_out_item_names(self) -> tuple:
         return self.out_items.get_item_names()
 
+    def get_out_item_speed_pm(self, item: Item):
+        for item_name, speed_pm in self.get_out_items():
+            if item == item_name:
+                return speed_pm
+
     def to_dict(self) -> dict:
         result = {
             "in_item": self.in_items.get_items(),
@@ -112,20 +117,19 @@ class RecipeNode():
         nlib3.print_error_log("指定されたレシピが正しくありません")
         return False
 
-    def get_out_speed_pm_from_main(self, item: Item) -> float | None:
-        for out_item, out_speed_pm in self.recipe.get_out_items():
-            if out_item == item:                                                            # 要求されたアイテムと同じなら
-                if self.main_item:                                                          # 入力アイテムがなければ
-                    return out_speed_pm
-                else:
-                    for in_item, in_speed_pm in self.recipe.get_in_items():                 # 全ての入力アイテム
-                        input_node_speed_pm_list = []                                       # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
-                        for input_recipe_node in self.input_recipe_node_list:               # 全ての前ノード
-                            result = input_recipe_node.get_out_speed_pm_from_main(in_item)  # 前ノードのレシピの出力から今回必要な素材を取得する
-                            if result:                                                      # 必要な入力アイテムの前ノードが存在すれば
-                                input_node_speed_pm_list.append(result)                     # このレシピに渡される in_item の数
-                        if input_node_speed_pm_list:                                        # 一つでも入力される素材があれば
-                            return (sum(input_node_speed_pm_list) / in_speed_pm) * out_speed_pm
+    def get_out_machines_num_from_main(self) -> float | None:
+        if self.main_item:                                                                                                    # 入力アイテムがなければ
+            return 1
+        else:
+            for in_item, in_speed_pm in self.recipe.get_in_items():                                                           # 全ての入力アイテム
+                input_node_speed_pm_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
+                for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
+                    if in_item in input_recipe_node.recipe.get_out_item_names():
+                        result = input_recipe_node.get_out_machines_num_from_main()                                           # 前ノードのレシピの出力から今回必要な素材を取得する
+                        if result:                                                                                            # 前ノード以前にメインノードが存在すれば
+                            input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
+                if input_node_speed_pm_list:                                                                                  # 一つでも入力される素材があれば
+                    return ((sum(input_node_speed_pm_list)) / in_speed_pm)
         return None
 
     def get_info(self, item: Item) -> tuple[float | None, float | None]:
@@ -161,6 +165,11 @@ class RecipeNode():
         return (result_out_speed_pm, machines)
 
     def detailed_recipe_tree_dumps(self) -> str:
+        """詳細な情報を付加したレシピツリーを出力する
+
+        Returns:
+            レシピツリーの文字列
+        """
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_info(item_name)
