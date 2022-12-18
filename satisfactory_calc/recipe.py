@@ -34,5 +34,6 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
     Item.quickwire: Recipe(RecipeIO(Item.caterium_ingot, 12), RecipeIO(Item.quickwire, 60), Building.constructor),
     alternate(Item.quickwire): Recipe(RecipeIO(Item.caterium_ingot, 7.5).add_item(Item.copper_ingot, 37.5), RecipeIO(Item.quickwire, 90), Building.constructor),
                                                                                                                                                                  # Liquid
-    Item.water: Recipe(RecipeIO(), RecipeIO(Item.water, 240), Building.pump),
+    Item.water: Recipe(RecipeIO(), RecipeIO(Item.water, 120), Building.water_extractor),
+    Item.crude_oil: Recipe(RecipeIO(), RecipeIO(Item.crude_oil, 120), Building.oil_extractor),
 }
