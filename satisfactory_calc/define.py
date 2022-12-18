@@ -23,6 +23,10 @@ class Ingredients(Item):
     # Copper
     copper_ore = "Copper Ore"
     copper_ingot = "Copper Ingot"
+    copper_powder = "Copper Powder"
+    copper_sheet = "Copper Sheet"
+    wire = "Wire"
+    cable = "Cable"
     # Raw Quartz
     raw_quartz = "Raw Quartz"
     quartz_crystal = "Quartz Crystal"

@@ -60,6 +60,30 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
     Recipe(
         RecipeIO(Ingredients.copper_ore, 30),
         RecipeIO(Ingredients.copper_ingot, 30),
+        Building.smelter,
+    ),
+    Ingredients.copper_powder:
+    Recipe(
+        RecipeIO(Ingredients.copper_ingot, 300),
+        RecipeIO(Ingredients.copper_powder, 50),
+        Building.constructor,
+    ),
+    Ingredients.copper_sheet:
+    Recipe(
+        RecipeIO(Ingredients.copper_ingot, 20),
+        RecipeIO(Ingredients.copper_sheet, 10),
+        Building.constructor,
+    ),
+    Ingredients.wire:
+    Recipe(
+        RecipeIO(Ingredients.copper_ingot, 15),
+        RecipeIO(Ingredients.wire, 30),
+        Building.constructor,
+    ),
+    Ingredients.cable:
+    Recipe(
+        RecipeIO(Ingredients.wire, 60),
+        RecipeIO(Ingredients.cable, 30),
         Building.constructor,
     ),
                                                                                                 # Raw Quartz
