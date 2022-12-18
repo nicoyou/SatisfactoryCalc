@@ -1,0 +1,11 @@
+__pycache__
+/.venv/
+/.vscode/
+
+/data/
+
+
+# パッケージ化
+/build/
+/dist/
+/satisfactory_calc.egg-info/
