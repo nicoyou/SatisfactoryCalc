@@ -68,6 +68,6 @@ class Building(nlib3.StrEnum):
 
 class Purity(float, enum.Enum):
     """純度"""
-    impure = 0.5
-    normal = 1
-    pure = 2
+    impure = 0.5    # 低純度
+    normal = 1      # 中純度
+    pure = 2        # 高純度

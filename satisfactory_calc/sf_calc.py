@@ -124,7 +124,7 @@ class RecipeNode():
                             result = input_recipe_node.get_out_speed_pm_from_main(in_item)  # 前ノードのレシピの出力から今回必要な素材を取得する
                             if result:                                                      # 必要な入力アイテムの前ノードが存在すれば
                                 input_node_speed_pm_list.append(result)                     # このレシピに渡される in_item の数
-                        if input_node_speed_pm_list:
+                        if input_node_speed_pm_list:                                        # 一つでも入力される素材があれば
                             return (sum(input_node_speed_pm_list) / in_speed_pm) * out_speed_pm
         return None
 
@@ -152,7 +152,7 @@ class RecipeNode():
 
                             if result:
                                 input_node_speed_pm_list.append(result)                                         # このレシピに渡される in_item の数
-                        if input_node_speed_pm_list:
+                        if input_node_speed_pm_list:                                                            # 一つでも入力される素材があれば
                             machines_temp = sum(input_node_speed_pm_list) / in_speed_pm
                             result_out_speed_pm_temp = machines_temp * out_speed_pm
                             if result_out_speed_pm is None or result_out_speed_pm < result_out_speed_pm_temp:   # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
@@ -160,7 +160,7 @@ class RecipeNode():
                                 result_out_speed_pm = result_out_speed_pm_temp
         return (result_out_speed_pm, machines)
 
-    def get_recipe_tree_str(self) -> str:
+    def detailed_recipe_tree_dumps(self) -> str:
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_info(item_name)
@@ -169,8 +169,14 @@ class RecipeNode():
         result += ")"
         if self.input_recipe_node_list:
             result += "  ←  "
-            for row in self.input_recipe_node_list:
-                result += row.get_recipe_tree_str()
+            for i, row in enumerate(self.input_recipe_node_list):
+                if len(row.input_recipe_node_list) >= 1:    # 入力素材の入力素材が一つ以上あれば
+                    if i == len(self.input_recipe_node_list) - 1:
+                        result += "[" + row.get_recipe_tree_str() + "]"
+                    else:
+                        result += "[" + row.get_recipe_tree_str() + "], "
+                else:
+                    result += row.get_recipe_tree_str()
         return result
 
     def __str__(self) -> str:
