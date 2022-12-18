@@ -4,6 +4,11 @@ import nlib3
 
 
 class Item(nlib3.StrEnum):
+    """アイテム"""
+
+
+class Ingredients(Item):
+    """材料"""
     # Coal
     coal = "Coal"
     # Iron
@@ -27,13 +32,20 @@ class Item(nlib3.StrEnum):
     sulfur = "Sulfur"
     black_powder = "Black Powder"
     compacted_coal = "Compacted Coal"
-    # Liquid
-    water = "Water"
-    crude_oil = "Crude Oil"
-    sulfuric_acid = "Sulfuric Acid"
     # Nuclear power
     uranium = "Uranium"
     encased_uranium_cell = "Encased Uranium Cell"
+
+
+class Liquid(Item):
+    """液体の材料"""
+    water = "Water"
+    crude_oil = "Crude Oil"
+    sulfuric_acid = "Sulfuric Acid"
+
+
+class Gas(Item):
+    """気体の材料"""
 
 
 class Building(nlib3.StrEnum):
@@ -48,8 +60,6 @@ class Building(nlib3.StrEnum):
     oil_extractor = "Oil Extractor"         # 原油抽出機
     refinery = "Refinery"                   # 精製施設
     othre = "othre"
-
-
 
 
 class Purity(float, enum.Enum):
