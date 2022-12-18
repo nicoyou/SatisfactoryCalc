@@ -172,11 +172,11 @@ class RecipeNode():
             for i, row in enumerate(self.input_recipe_node_list):
                 if len(row.input_recipe_node_list) >= 1:    # 入力素材の入力素材が一つ以上あれば
                     if i == len(self.input_recipe_node_list) - 1:
-                        result += "[" + row.get_recipe_tree_str() + "]"
+                        result += "[" + row.detailed_recipe_tree_dumps() + "]"
                     else:
-                        result += "[" + row.get_recipe_tree_str() + "], "
+                        result += "[" + row.detailed_recipe_tree_dumps() + "], "
                 else:
-                    result += row.get_recipe_tree_str()
+                    result += row.detailed_recipe_tree_dumps()
         return result
 
     def __str__(self) -> str:
