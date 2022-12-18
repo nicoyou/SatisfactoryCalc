@@ -118,45 +118,41 @@ class RecipeNode():
         return False
 
     def get_out_machines_num_from_main(self) -> float | None:
-        if self.main_item:                                                                                                    # 入力アイテムがなければ
+        if self.main_item:  # 入力アイテムがなければ
             return 1
-        else:
-            for in_item, in_speed_pm in self.recipe.get_in_items():                                                           # 全ての入力アイテム
-                input_node_speed_pm_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
-                for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
-                    if in_item in input_recipe_node.recipe.get_out_item_names():
-                        result = input_recipe_node.get_out_machines_num_from_main()                                           # 前ノードのレシピの出力から今回必要な素材を取得する
-                        if result:                                                                                            # 前ノード以前にメインノードが存在すれば
-                            input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
-                if input_node_speed_pm_list:                                                                                  # 一つでも入力される素材があれば
-                    return ((sum(input_node_speed_pm_list)) / in_speed_pm)
+
+        for in_item, in_speed_pm in self.recipe.get_in_items():                                                           # 全ての入力アイテム
+            input_node_speed_pm_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
+            for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
+                if in_item in input_recipe_node.recipe.get_out_item_names():                                              # 今回求めている入力素材が、前のレシピノードの出力素材なら
+                    result = input_recipe_node.get_out_machines_num_from_main()                                           # 前ノードのレシピの出力から今回必要な素材を取得する
+                    if result:                                                                                            # 前ノード以前にメインノードが存在すれば
+                        input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
+            if input_node_speed_pm_list:                                                                                  # 一つでも入力される素材があれば
+                return ((sum(input_node_speed_pm_list)) / in_speed_pm)
         return None
 
-    def get_machines_num(self, item: Item) -> float | None:
-        """毎分生成されるアイテムの数を取得する
-
-        Args:
-            item: 複数個の出力が存在する可能性があるため、取得したいアイテムの種類を指定する
+    def get_out_machines_num(self) -> float | None:
+        """設置すべき機会の台数を取得する ( 一番高頻度で搬入された素材に合わせて計算する )
 
         Returns:
-            アイテム数
+            全ての素材の中で最大の機械数
         """
+        if not self.recipe.get_in_items():  # 入力アイテムがなければ
+            return 1
+
         result_machines_num = None
-        for out_item, out_speed_pm in self.recipe.get_out_items():
-            if out_item == item:                                                                                                      # 要求されたアイテムと同じなら
-                if not self.recipe.get_in_items():                                                                                    # 入力アイテムがなければ
-                    result_machines_num = 1
-                else:
-                    for in_item, in_speed_pm in self.recipe.get_in_items():                                                           # 全ての入力アイテム
-                        input_node_machines_num_list = []                                                                             # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
-                        for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
-                            result = input_recipe_node.get_machines_num(in_item)                                                      # このレシピに渡される前のレシピの台数
-                            if result:
-                                input_node_machines_num_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
-                        if input_node_machines_num_list:                                                                              # 一つでも入力される素材があれば
-                            machines_temp = sum(input_node_machines_num_list) / in_speed_pm
-                            if result_machines_num is None or result_machines_num < machines_temp:                                    # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
-                                result_machines_num = machines_temp
+        for in_item, in_speed_pm in self.recipe.get_in_items():                                                               # 全ての入力アイテム
+            input_node_machines_num_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
+            for input_recipe_node in self.input_recipe_node_list:                                                             # 全ての前ノード
+                if in_item in input_recipe_node.recipe.get_out_item_names():                                                  # 今回求めている入力素材が、前のレシピノードの出力素材なら
+                    result = input_recipe_node.get_out_machines_num()                                                         # このレシピに渡される前のレシピの台数
+                    if result:
+                        input_node_machines_num_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
+            if input_node_machines_num_list:                                                                                  # 一つでも入力される素材があれば
+                machines_temp = sum(input_node_machines_num_list) / in_speed_pm
+                if result_machines_num is None or result_machines_num < machines_temp:                                        # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
+                    result_machines_num = machines_temp
         return result_machines_num
 
     def detailed_recipe_tree_dumps(self) -> str:
@@ -167,7 +163,7 @@ class RecipeNode():
         """
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
-            info_result = self.get_machines_num(item_name)
+            info_result = self.get_out_machines_num()
             result += f"{{item: {item_name}, out: {info_result*speed_pm}, machines: {info_result}}}, "
         result = result[:-2]
         result += ")"
