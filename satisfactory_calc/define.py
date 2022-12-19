@@ -27,7 +27,7 @@ class Ingredients(Item):
     # Plants/Animals 植物・動物類
     leaves = "Leaves"                           # 葉
     wood = "Wood"                               # 木
-    flower_petals = "Flower Petals"             #花弁
+    flower_petals = "Flower Petals"             # 花弁
     mycelia = "Mycelia"                         # 菌糸
     blue_power_slug = "Blue Power Slug"         # 青のパワー・スラッグ
     yellow_power_slug = "Yellow Power Slug"     # 黄のパワー・スラッグ

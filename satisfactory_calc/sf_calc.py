@@ -210,6 +210,9 @@ class RecipeNode():
 
     def automatic_node_generation(self):
         """基本レシピを使用して子ノードを自動で生成する"""
+        for row in self.input_recipe_node_list:
+            row.automatic_node_generation()
+
         for in_item_name in self.recipe.get_in_item_names():    # 入力レシピノードの出力素材に存在すれば
             if not recipe.RECIPE.get(in_item_name):
                 nlib3.print_error_log(f"入力素材のレシピが存在しません [item={in_item_name}]")
