@@ -6,6 +6,7 @@ import nlib3
 
 from . import define, recipe
 from .define import Building, Gas, Ingredients, Item, Liquid, Purity
+from . import language_pack
 
 
 class RecipeIO():
@@ -150,13 +151,19 @@ def load_recipe_list(file_path: str | Path):
 
 class RecipeNode():
     """一つのレシピを木構造のノードとして保持するクラス ( 子ノードの情報のみ保持する )"""
-    def __init__(self, recipe: Recipe, parent=None, main_item=False) -> None:
+    def __init__(self, recipe: Recipe, parent=None, language: language_pack.Language = language_pack.Language.english, main_item=False) -> None:
         self.recipe = recipe
         self.input_recipe_node_list = []
+        self.language = language
         self.main_item = main_item
         if parent is not None:
             parent.add_input_recipe_node(self)
+            self.language = parent.language
         return
+
+    def t_item_name(self, item: Item) -> str:
+        """デフォルト言語のアイテム名に変換する"""
+        return language_pack.translation(item, self.language)
 
     def add_input_recipe_node(self, recipe_node) -> bool:
         """子ノードを追加する
@@ -280,7 +287,7 @@ class RecipeNode():
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_out_machines_num()
-            result += f"{{item: {item_name}, out: {info_result * speed_pm}, machines: {info_result}}}, "
+            result += f"{{item: {self.t_item_name(item_name)}, out: {info_result * speed_pm}, machines: {info_result}}}, "
         result = result[:-2]
         result += ")"
         if self.input_recipe_node_list:
@@ -309,7 +316,7 @@ class RecipeNode():
                 return ""
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
-            result += f"{{item: {item_name}, out: {out_machines_num * speed_pm}, machines: {out_machines_num}}}, "
+            result += f"{{item: {self.t_item_name(item_name)}, out: {out_machines_num * speed_pm}, machines: {out_machines_num}}}, "
         result = result[:-2]
         result += ")"
         if self.input_recipe_node_list:
@@ -353,7 +360,7 @@ class RecipeNode():
         self_node_id = str(uuid.uuid4())
         self_node_text = ""
         for row in self.recipe.get_out_item_names():
-            self_node_text += f"{row}, "
+            self_node_text += f"{self.t_item_name(row)}, "
         self_node_text = self_node_text[:-2]
         dot.node(self_node_id, self_node_text)
         if self.input_recipe_node_list:
@@ -364,7 +371,7 @@ class RecipeNode():
     def __str__(self) -> str:
         result = "("
         for row in self.recipe.get_out_item_names():
-            result += f"{row}, "
+            result += f"{self.t_item_name(row)}, "
         result = result[:-2]
         result += ")"
         if self.input_recipe_node_list:
