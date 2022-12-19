@@ -1,5 +1,7 @@
+import uuid
 from pathlib import Path
 
+import graphviz
 import nlib3
 
 from . import define, recipe
@@ -172,6 +174,18 @@ class RecipeNode():
         nlib3.print_error_log("指定されたレシピが正しくありません")
         return False
 
+    def set_main_item_flag(self, flag: bool) -> bool:
+        """計算の基準として使用するメインノードかどうかを設定する
+
+        Args:
+            flag: メインノードなら True
+
+        Returns:
+            あたらに設定されたフラグ
+        """
+        self.main_item = flag
+        return self.main_item
+
     def get_input_nodes(self, item: Item) -> list:
         """出力するアイテムを指定して保持している子ノードを取得する
 
@@ -186,6 +200,24 @@ class RecipeNode():
             if item in row.recipe.get_out_item_names():
                 result_list.append(row)
         return result_list
+
+    def automatic_node_generation(self):
+        """基本レシピを使用して子ノードを自動で生成する"""
+        for in_item_name in self.recipe.get_in_item_names():    # 入力レシピノードの出力素材に存在すれば
+            if not recipe.RECIPE.get(in_item_name):
+                nlib3.print_error_log(f"入力素材のレシピが存在しません [item={in_item_name}]")
+                continue
+            exist = False
+            for row in self.input_recipe_node_list:
+                if in_item_name in row.recipe.get_out_item_names():
+                    exist = True
+            if exist:
+                print(f"既に存在するノードの生成をスキップしました [item={in_item_name}]")
+                continue
+
+            child_node = RecipeNode(recipe.RECIPE[in_item_name], parent=self)
+            child_node.automatic_node_generation()
+        return
 
     def get_out_machines_num_based_main_item(self) -> float | None:
         """メインレシピノードのアイテム数を基準に設置すべき施設の台数を取得する
@@ -299,23 +331,34 @@ class RecipeNode():
                             result += recipe_tree_dumps_result
         return result
 
-    def automatic_node_generation(self):
-        """基本レシピを使用して子ノードを自動で生成する"""
-        for in_item_name in self.recipe.get_in_item_names():    # 入力レシピノードの出力素材に存在すれば
-            if not recipe.RECIPE.get(in_item_name):
-                nlib3.print_error_log(f"入力素材のレシピが存在しません [item={in_item_name}]")
-                continue
-            exist = False
-            for row in self.input_recipe_node_list:
-                if in_item_name in row.recipe.get_out_item_names():
-                    exist = True
-            if exist:
-                print(f"既に存在するノードの生成をスキップしました [item={in_item_name}]")
-                continue
-
-            child_node = RecipeNode(recipe.RECIPE[in_item_name], parent=self)
-            child_node.automatic_node_generation()
+    def graph_nodes(self):
+        """レシピツリーの全グラフを画像に出力する
+        """
+        dot = graphviz.Digraph("recipe_tree", comment="The Round Table", format="png")
+        dot.attr("node", fontname="MS Gothic")
+        self.add_graph_node(dot)
+        dot.render(directory="data", view=True)
         return
+
+    def add_graph_node(self, dot):
+        """このノード情報を渡された graphviz オブジェクトに追加する
+
+        Args:
+            dot: graphviz オブジェクト
+
+        Returns:
+            ノード ID
+        """
+        self_node_id = str(uuid.uuid4())
+        self_node_text = ""
+        for row in self.recipe.get_out_item_names():
+            self_node_text += f"{row}, "
+        self_node_text = self_node_text[:-2]
+        dot.node(self_node_id, self_node_text)
+        if self.input_recipe_node_list:
+            for row in self.input_recipe_node_list:
+                dot.edge(row.add_graph_node(dot), self_node_id, constraint="false")
+        return self_node_id
 
     def __str__(self) -> str:
         result = "("

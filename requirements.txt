@@ -1,4 +1,5 @@
 nlib3
+graphviz
 
 # pypi
 wheel
