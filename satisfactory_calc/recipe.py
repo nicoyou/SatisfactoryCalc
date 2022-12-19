@@ -8,13 +8,26 @@ def alternate(product: Item, num: int = 1) -> str:
     """代替レシピのキーを生成する
 
     Args:
-        product: 元のアイテム名
+        product: 生成されるアイテム名
         num: 代替レシピの番号 ( n番目 )
 
     Returns:
         キー
     """
     return f"alternate{num}_{product}"
+
+
+def byproduct(product: Item, num: int = 1) -> str:
+    """副産物からレシピを探すためのサブキーを生成する
+
+    Args:
+        product: 生成される副産物のアイテム
+        num: 副産物レシピの番号 ( n番目 )
+
+    Returns:
+        キー
+    """
+    return f"byproduct{num}_{product}"
 
 
 RECIPE: Final[dict[str | Item, Recipe]] = {
