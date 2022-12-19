@@ -334,8 +334,9 @@ class RecipeNode():
     def graph_nodes(self):
         """レシピツリーの全グラフを画像に出力する
         """
-        dot = graphviz.Digraph("recipe_tree", comment="The Round Table", format="png")
-        dot.attr("node", fontname="MS Gothic")
+        dot = graphviz.Digraph("recipe_tree", comment="Recipe", format="png", engine="dot")
+        dot.attr("graph", rankdir="BT")
+        dot.attr("node", fontname="MS Gothic", shape="box")
         self.add_graph_node(dot)
         dot.render(directory="data", view=True)
         return
@@ -357,7 +358,7 @@ class RecipeNode():
         dot.node(self_node_id, self_node_text)
         if self.input_recipe_node_list:
             for row in self.input_recipe_node_list:
-                dot.edge(row.add_graph_node(dot), self_node_id, constraint="false")
+                dot.edge(row.add_graph_node(dot), self_node_id)
         return self_node_id
 
     def __str__(self) -> str:
