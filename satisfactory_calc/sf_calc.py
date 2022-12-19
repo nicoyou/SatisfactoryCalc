@@ -172,6 +172,21 @@ class RecipeNode():
         nlib3.print_error_log("指定されたレシピが正しくありません")
         return False
 
+    def get_input_nodes(self, item: Item) -> list:
+        """出力するアイテムを指定して保持している子ノードを取得する
+
+        Args:
+            item: 子ノードが出力するアイテム
+
+        Returns:
+            子ノードを格納したリスト
+        """
+        result_list = []
+        for row in self.input_recipe_node_list:
+            if item in row.recipe.get_out_item_names():
+                result_list.append(row)
+        return result_list
+
     def get_out_machines_num_based_main_item(self) -> float | None:
         """メインレシピノードのアイテム数を基準に設置すべき施設の台数を取得する
 
