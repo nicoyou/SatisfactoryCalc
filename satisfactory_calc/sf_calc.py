@@ -2,8 +2,8 @@ from pathlib import Path
 
 import nlib3
 
-from . import define
-from .define import Building, Item, Ingredients, Liquid, Gas, Purity
+from . import define, recipe
+from .define import Building, Gas, Ingredients, Item, Liquid, Purity
 
 
 class RecipeIO():
@@ -283,6 +283,24 @@ class RecipeNode():
                         else:
                             result += recipe_tree_dumps_result
         return result
+
+    def automatic_node_generation(self):
+        """基本レシピを使用して子ノードを自動で生成する"""
+        for in_item_name in self.recipe.get_in_item_names():    # 入力レシピノードの出力素材に存在すれば
+            if not recipe.RECIPE.get(in_item_name):
+                nlib3.print_error_log(f"入力素材のレシピが存在しません [item={in_item_name}]")
+                continue
+            exist = False
+            for row in self.input_recipe_node_list:
+                if in_item_name in row.recipe.get_out_item_names():
+                    exist = True
+            if exist:
+                print(f"既に存在するノードの生成をスキップしました [item={in_item_name}]")
+                continue
+
+            child_node = RecipeNode(recipe.RECIPE[in_item_name], parent=self)
+            child_node.automatic_node_generation()
+        return
 
     def __str__(self) -> str:
         result = "("
