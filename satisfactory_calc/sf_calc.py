@@ -278,21 +278,30 @@ class RecipeNode():
                     result_machines_num = machines_temp
         return result_machines_num
 
-    def detailed_recipe_tree_dumps(self) -> str:
+    def detailed_recipe_tree_dumps(self, add_graph_node_dot=None) -> str:
         """詳細な情報を付加したレシピツリーを出力する
 
         Returns:
             レシピツリーの文字列
         """
+        self_node_id = str(uuid.uuid4())
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_out_machines_num()
             result += f"{{item: {self.t_item_name(item_name)}, out: {info_result * speed_pm}, machines: {info_result}}}, "
         result = result[:-2]
         result += ")"
+
+        if add_graph_node_dot:
+            add_graph_node_dot.node(self_node_id, result.replace("(", "").replace(")", "").replace("{", "[").replace("}", "]"))
+
         if self.input_recipe_node_list:
             result += "  ←  "
             for i, row in enumerate(self.input_recipe_node_list):
+                if add_graph_node_dot:
+                    add_graph_node_dot.edge(row.detailed_recipe_tree_dumps(add_graph_node_dot), self_node_id)
+                    continue
+
                 if len(row.input_recipe_node_list) >= 1:    # 入力素材の入力素材が一つ以上あれば
                     if i == len(self.input_recipe_node_list) - 1:
                         result += "[" + row.detailed_recipe_tree_dumps() + "]"
@@ -300,15 +309,18 @@ class RecipeNode():
                         result += "[" + row.detailed_recipe_tree_dumps() + "], "
                 else:
                     result += row.detailed_recipe_tree_dumps()
+        if add_graph_node_dot:
+            return self_node_id
         return result
 
-    def detailed_recipe_tree_dumps_based_main_item(self, out_machines_num: float | None = None) -> str:
+    def detailed_recipe_tree_dumps_based_main_item(self, out_machines_num: float | None = None, add_graph_node_dot=None) -> str:
         """詳細な情報を付加したレシピツリーを出力する
         必要資源を計算するときに main_item が指定されているノードを元に他の全資源を計算する
 
         Returns:
             レシピツリーの文字列
         """
+        self_node_id = str(uuid.uuid4())
         if out_machines_num is None:
             out_machines_num = self.get_out_machines_num_based_main_item()
             if out_machines_num is None:
@@ -319,6 +331,10 @@ class RecipeNode():
             result += f"{{item: {self.t_item_name(item_name)}, out: {out_machines_num * speed_pm}, machines: {out_machines_num}}}, "
         result = result[:-2]
         result += ")"
+
+        if add_graph_node_dot:
+            add_graph_node_dot.node(self_node_id, result.replace("(", "").replace(")", "").replace("{", "[").replace("}", "]"))
+
         if self.input_recipe_node_list:
             result += "  ←  "
             for i, row in enumerate(self.input_recipe_node_list):
@@ -328,23 +344,35 @@ class RecipeNode():
                             need_speed_pm = row.get_out_machines_num(in_item_name, in_item_speed_pm * out_machines_num) # 再帰するときに入力レシピノードに要求する素材の数を計算する
                         else:
                             need_speed_pm = row.get_out_machines_num()                                                  # メインアイテムの場合は普通に計算に計算しないと、複数の採掘機が設定されていた場合は、その合計に再計算されてしまう
-                        recipe_tree_dumps_result = row.detailed_recipe_tree_dumps_based_main_item(need_speed_pm)        # 入力レシピノードに要求素材数を渡してツリー図を要求する
-                        if len(row.input_recipe_node_list) >= 1:                                                        # 入力素材の入力素材が一つ以上あれば
+
+                        if add_graph_node_dot:
+                            add_graph_node_dot.edge(row.detailed_recipe_tree_dumps_based_main_item(need_speed_pm, add_graph_node_dot), self_node_id)
+                            continue
+
+                        recipe_tree_dumps_result = row.detailed_recipe_tree_dumps_based_main_item(need_speed_pm)    # 入力レシピノードに要求素材数を渡してツリー図を要求する
+                        if len(row.input_recipe_node_list) >= 1:                                                    # 入力素材の入力素材が一つ以上あれば
                             if i == len(self.input_recipe_node_list) - 1:
                                 result += "[" + recipe_tree_dumps_result + "]"
                             else:
                                 result += "[" + recipe_tree_dumps_result + "], "
                         else:
                             result += recipe_tree_dumps_result
+        if add_graph_node_dot:
+            return self_node_id
         return result
 
-    def graph_nodes(self):
+    def graph_nodes(self, detailed_flag=False, based_main_item_flag=False):
         """レシピツリーの全グラフを画像に出力する
         """
         dot = graphviz.Digraph("recipe_tree", comment="Recipe", format="png", engine="dot")
         dot.attr("graph", rankdir="BT")
         dot.attr("node", fontname="MS Gothic", shape="box")
-        self.add_graph_node(dot)
+        if detailed_flag and based_main_item_flag:
+            self.detailed_recipe_tree_dumps_based_main_item(None, dot)
+        elif detailed_flag:
+            self.detailed_recipe_tree_dumps(dot)
+        else:
+            self.add_graph_node(dot)
         dot.render(directory="data", view=True)
         return
 
