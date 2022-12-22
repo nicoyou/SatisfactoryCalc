@@ -178,7 +178,7 @@ class RecipeNode():
             if out_item in self.recipe.in_items.get_item_names():
                 self.input_recipe_node_list.append(recipe_node)
                 return True
-        nlib3.print_error_log("指定されたレシピが正しくありません")
+        nlib3.print_error_log(f"指定されたレシピが正しくありません [out={self.recipe.get_out_item_names()}, in={recipe_node.recipe.get_in_item_names()}]")
         return False
 
     def set_main_item_flag(self, flag: bool) -> bool:
@@ -291,7 +291,7 @@ class RecipeNode():
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
             info_result = self.get_out_machines_num()
-            result += f"{{item: {self.t_item_name(item_name)}, out: {info_result * speed_pm}, machines: {info_result}}}, "
+            result += f"{{item: {self.t_item_name(item_name)}, out: {info_result * speed_pm:.2f}, machines: {info_result:.2f}}}, "
         result = result[:-2]
         result += ")"
 
@@ -331,7 +331,7 @@ class RecipeNode():
                 return ""
         result = "("
         for item_name, speed_pm in self.recipe.get_out_items():
-            result += f"{{item: {self.t_item_name(item_name)}, out: {out_machines_num * speed_pm}, machines: {out_machines_num}}}, "
+            result += f"{{item: {self.t_item_name(item_name)}, out: {out_machines_num * speed_pm:.2f}, machines: {out_machines_num:.2f}}}, "
         result = result[:-2]
         result += ")"
 
