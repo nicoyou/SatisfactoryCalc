@@ -31,9 +31,8 @@ def byproduct(product: Item, num: int = 1) -> str:
 
 
 RECIPE: Final[dict[str | Item, Recipe]] = {
-
     # Ore 鉱石
-        Ingredients.iron_ore: # 鉄鉱石
+    Ingredients.iron_ore: # 鉄鉱石
     Recipe(
         RecipeIO(),
         RecipeIO(Ingredients.iron_ore, 240),
@@ -1061,7 +1060,7 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.plutonium_fuel_rod,0.25),
         Building.manufacturer,
     ),
-    alternate(Ingredients.encased_plutonium_cell):
+    alternate(Ingredients.plutonium_fuel_rod):
     Recipe(
         RecipeIO(Ingredients.encased_plutonium_cell,10).add_item(Ingredients.pressure_conversion_cube,0.5),
         RecipeIO(Ingredients.plutonium_fuel_rod,0.5),
@@ -1303,7 +1302,6 @@ RECIPE: Final[dict[str | Item, Recipe]] = {
         RecipeIO(Ingredients.beacon,10),
         Building.manufacturer,
     ),
-
 }
 
 # byproduct 副産物
