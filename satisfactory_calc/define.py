@@ -48,8 +48,8 @@ class Ingredients(Item):
 
     # Others その他
     hard_drive = "Hard Drive"           # ハードドライブ
-    hub_parts = "HUB Parts"             # HUB部品
-    ficsit_coupon = "FICSIT Coupon"     # FICSITクーポン
+    hub_parts = "HUB Parts"             # HUB 部品
+    ficsit_coupon = "FICSIT Coupon"     # FICSIT クーポン
     mercer_sphere = "Mercer Sphere"     # マーサー・スフィア
     somersloop = "Somersloop"           # ソマースループ
     power_shard = "Power Shard"         # パワー・シャード
@@ -144,7 +144,7 @@ class Ingredients(Item):
 
     # Container 容器入り
     packaged_fuel = "Packaged Fuel"                             # 容器入り燃料
-    packaged_turbofuel = "Packaged Turbofuel"                   # 容器入りターボ燃料
+    packaged_turbo_fuel = "Packaged Turbofuel"                  # 容器入りターボ燃料
     packaged_liquid_biofuel = "Packaged Liquid Biofuel"         # 容器入り液体バイオ燃料
     packaged_heavy_oil_residue = "Packaged Heavy Oil Residue"   # 容器入り廃重油
     packaged_oil = "Packaged Oil"                               # 容器入り原油
@@ -188,7 +188,7 @@ class Liquid(Item):
     crude_oil = "Crude Oil"                     # 原油
     heavy_oil_residue = "Heavy Oil Residue"     # 廃重油
     fuel = "Fuel"                               # 燃料
-    Turbofuel = "Turbofuel"                     # ターボ燃料
+    turbo_fuel = "Turbofuel"                    # ターボ燃料
     liquid_biofuel = "Liquid Biofuel"           # 液体バイオ燃料
     alumina_solution = "Alumina Solution"       # アルミナ溶液
     sulfuric_acid = "Sulfuric Acid"             # 硫酸
@@ -235,7 +235,7 @@ class Building(nlib3.StrEnum):
     geothermal_generator = "Geothermal Generator"   # 地熱発電機
     nuclear_power_plant = "Nuclear Power Plant"     # 原子力発電所
 
-    othre = "othre"
+    other = "other"
 
 
 class Purity(float, enum.Enum):

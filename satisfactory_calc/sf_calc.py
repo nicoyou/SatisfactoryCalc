@@ -238,14 +238,14 @@ class RecipeNode():
         if self.main_item:  # 入力アイテムがなければ
             return 1
 
-        for in_item, in_speed_pm in self.recipe.get_in_items():                                                           # 全ての入力アイテム
-            input_node_speed_pm_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
-            for input_recipe_node in self.input_recipe_node_list:                                                         # 全ての前ノード
-                if in_item in input_recipe_node.recipe.get_out_item_names():                                              # 今回求めている入力素材が、前のレシピノードの出力素材なら
-                    result = input_recipe_node.get_out_machines_num_based_main_item()                                     # 前ノードのレシピの出力から今回必要な素材を取得する
-                    if result:                                                                                            # 前ノード以前にメインノードが存在すれば
-                        input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
-            if input_node_speed_pm_list:                                                                                  # 一つでも入力される素材があれば
+        for in_item, in_speed_pm in self.recipe.get_in_items():                                                             # 全ての入力アイテム
+            input_node_speed_pm_list = []                                                                                   # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
+            for input_recipe_node in self.input_recipe_node_list:                                                           # 全ての前ノード
+                if in_item in input_recipe_node.recipe.get_out_item_names():                                                # 今回求めている入力素材が、前のレシピノードの出力素材なら
+                    result = input_recipe_node.get_out_machines_num_based_main_item()                                       # 前ノードのレシピの出力から今回必要な素材を取得する
+                    if result:                                                                                              # 前ノード以前にメインノードが存在すれば
+                        input_node_speed_pm_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item))   # このレシピに渡される in_item の数
+            if input_node_speed_pm_list:                                                                                    # 一つでも入力される素材があれば
                 return ((sum(input_node_speed_pm_list)) / in_speed_pm)
         return None
 
@@ -268,16 +268,16 @@ class RecipeNode():
             return 1
 
         result_machines_num = None
-        for in_item, in_speed_pm in self.recipe.get_in_items():                                                               # 全ての入力アイテム
-            input_node_machines_num_list = []                                                                                 # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
-            for input_recipe_node in self.input_recipe_node_list:                                                             # 全ての前ノード
-                if in_item in input_recipe_node.recipe.get_out_item_names():                                                  # 今回求めている入力素材が、前のレシピノードの出力素材なら
-                    result = input_recipe_node.get_out_machines_num()                                                         # このレシピに渡される前のレシピの台数
+        for in_item, in_speed_pm in self.recipe.get_in_items():                                                                 # 全ての入力アイテム
+            input_node_machines_num_list = []                                                                                   # 現在接続されている前ノードの出力アイテムと現在のノードの入力ノードが一致する出力速度
+            for input_recipe_node in self.input_recipe_node_list:                                                               # 全ての前ノード
+                if in_item in input_recipe_node.recipe.get_out_item_names():                                                    # 今回求めている入力素材が、前のレシピノードの出力素材なら
+                    result = input_recipe_node.get_out_machines_num()                                                           # このレシピに渡される前のレシピの台数
                     if result:
-                        input_node_machines_num_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item)) # このレシピに渡される in_item の数
-            if input_node_machines_num_list:                                                                                  # 一つでも入力される素材があれば
+                        input_node_machines_num_list.append(result * input_recipe_node.recipe.get_out_item_speed_pm(in_item))   # このレシピに渡される in_item の数
+            if input_node_machines_num_list:                                                                                    # 一つでも入力される素材があれば
                 machines_temp = sum(input_node_machines_num_list) / in_speed_pm
-                if result_machines_num is None or result_machines_num < machines_temp:                                        # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
+                if result_machines_num is None or result_machines_num < machines_temp:                                          # 1つ目の input アイテムか、それ移行で今までのインプットアイテム量より効率が良ければ
                     result_machines_num = machines_temp
         return result_machines_num
 
@@ -341,12 +341,12 @@ class RecipeNode():
         if self.input_recipe_node_list:
             result += "  ←  "
             for i, row in enumerate(self.input_recipe_node_list):
-                for in_item_name, in_item_speed_pm in self.recipe.get_in_items():                                       # このレシピノードの入力素材が
-                    if in_item_name in row.recipe.get_out_item_names():                                                 # 入力レシピノードの出力素材に存在すれば
+                for in_item_name, in_item_speed_pm in self.recipe.get_in_items():                                           # このレシピノードの入力素材が
+                    if in_item_name in row.recipe.get_out_item_names():                                                     # 入力レシピノードの出力素材に存在すれば
                         if not row.main_item:
-                            need_speed_pm = row.get_out_machines_num(in_item_name, in_item_speed_pm * out_machines_num) # 再帰するときに入力レシピノードに要求する素材の数を計算する
+                            need_speed_pm = row.get_out_machines_num(in_item_name, in_item_speed_pm * out_machines_num)     # 再帰するときに入力レシピノードに要求する素材の数を計算する
                         else:
-                            need_speed_pm = row.get_out_machines_num()                                                  # メインアイテムの場合は普通に計算に計算しないと、複数の採掘機が設定されていた場合は、その合計に再計算されてしまう
+                            need_speed_pm = row.get_out_machines_num()                                                      # メインアイテムの場合は普通に計算に計算しないと、複数の採掘機が設定されていた場合は、その合計に再計算されてしまう
 
                         if add_graph_node_dot:
                             add_graph_node_dot.edge(row.detailed_recipe_tree_dumps_based_main_item(need_speed_pm, add_graph_node_dot), self_node_id)

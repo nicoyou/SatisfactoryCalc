@@ -154,7 +154,7 @@ LANGUAGE_PACK = {
 
                                                                 # Container 容器入り
         Ingredients.packaged_fuel: "容器入り燃料",
-        Ingredients.packaged_turbofuel: "容器入りターボ燃料",
+        Ingredients.packaged_turbo_fuel: "容器入りターボ燃料",
         Ingredients.packaged_liquid_biofuel: "容器入り液体バイオ燃料",
         Ingredients.packaged_heavy_oil_residue: "容器入り廃重油",
         Ingredients.packaged_oil: "容器入り原油",
@@ -196,7 +196,7 @@ LANGUAGE_PACK = {
         Liquid.crude_oil: "原油",
         Liquid.heavy_oil_residue: "廃重油",
         Liquid.fuel: "燃料",
-        Liquid.Turbofuel: "ターボ燃料",
+        Liquid.turbo_fuel: "ターボ燃料",
         Liquid.liquid_biofuel: "液体バイオ燃料",
         Liquid.alumina_solution: "アルミナ溶液",
         Liquid.sulfuric_acid: "硫酸",
